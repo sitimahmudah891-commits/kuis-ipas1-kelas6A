@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kuis IPAS Kelas 6A - Bab 1 (Dengan Timer)</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; color: #1e293b; margin: 0; padding: 20px; }
+    .container { max-width: 720px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #1e3a8a; font-size: 24px; margin-bottom: 5px; }
+    p.subtitle { text-align: center; color: #64748b; margin-top: 0; margin-bottom: 25px; }
+    .start-box { background: #eff6ff; padding: 25px; border-radius: 10px; border: 1px solid #bfdbfe; text-align: center; }
+    input[type="text"] { width: 100%; max-width: 400px; padding: 12px; border: 2px solid #93c5fd; border-radius: 8px; font-size: 16px; margin: 10px 0 20px; box-sizing: border-box; text-align: center; }
+    .timer-bar { position: sticky; top: 10px; z-index: 100; background: #1e3a8a; color: white; padding: 12px 20px; border-radius: 8px; display: none; justify-content: space-between; align-items: center; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    .timer-warning { background: #dc2626 !important; animation: pulse 1s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.85; } 100% { opacity: 1; } }
+    .section-title { background: #e2e8f0; padding: 10px 15px; border-radius: 6px; font-weight: bold; color: #0f172a; margin: 25px 0 15px; }
+    .question-card { background: #f8fafc; padding: 18px; border-radius: 8px; margin-bottom: 18px; border-left: 5px solid #3b82f6; }
+    .badge { display: inline-block; padding: 3px 8px; font-size: 12px; font-weight: bold; border-radius: 4px; margin-bottom: 8px; }
+    .easy { background: #dcfce7; color: #166534; }
+    .medium { background: #fef9c3; color: #854d0e; }
+    .hots { background: #fee2e2; color: #991b1b; }
+    .options label { display: block; padding: 10px 12px; margin: 6px 0; background: white; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+    .options label:hover { background: #eff6ff; border-color: #3b82f6; }
+    button { padding: 14px 28px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    button:hover { background: #1d4ed8; }
+    .btn-full { width: 100%; font-size: 18px; margin-top: 10px; }
+    #quiz-area { display: none; }
+    #result { display: none; padding: 25px; background: #ecfdf5; border: 2px solid #10b981; border-radius: 10px; margin-top: 20px; }
+    .result-header { text-align: center; }
+    .score { font-size: 52px; font-weight: bold; color: #059669; margin: 10px 0; }
+    .review-item { background: white; padding: 12px 15px; border-radius: 6px; margin-top: 10px; border-left: 4px solid #94a3b8; font-size: 14px; }
+    .correct-border { border-left-color: #10b981; }
+    .wrong-border { border-left-color: #ef4444; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Latihan Soal IPAS Kelas 6A</h1>
+  <p class="subtitle">Bab 1: Makanan Bergizi untuk Kesehatan Pencernaanmu</p>
+
+  <div id="start-screen" class="start-box">
+    <h3>Selamat Datang di Ujian Online!</h3>
+    <p>Jumlah Soal: <strong>30 Pilihan Ganda</strong> | Waktu Pengerjaan: <strong>45 Menit</strong></p>
+    <input type="text" id="studentName" placeholder="Ketik Nama Lengkapmu di Sini..." required>
+    <br>
+    <button onclick="startQuiz()">Mulai Mengerjakan Sekarang</button>
+  </div>
+
+  <div id="timer-bar" class="timer-bar">
+    <span>Peserta: <strong id="display-name"></strong></span>
+    <span>Sisa Waktu: <strong id="time-left">45:00</strong></span>
+  </div>
+
+  <div id="quiz-area">
+    <div id="questions-container"></div>
+    <button class="btn-full" onclick="submitQuiz(false)">Selesai & Kirim Jawaban</button>
+  </div>
+
+  <div id="result">
+    <div class="result-header">
+      <h2 id="resTitle">Hasil Evaluasi Belajar</h2>
+      <p>Nama Siswa: <strong id="resName"></strong></p>
+      <div class="score" id="resScore">0</div>
+      <p id="resDetail"></p>
+      <button onclick="location.reload()" style="background:#059669; margin: 10px 0 20px;">Kerjakan Ulang</button>
+    </div>
+    <h3>Pembahasan & Kunci Jawaban:</h3>
+    <div id="review-container"></div>
+  </div>
+</div>
+
+<script>
+const quizData = [
+  { sec: "A. Begini Cara Kerja Sistem Pencernaan", level: "Easy", q: "1. Urutan saluran pencernaan manusia dari awal hingga akhir yang benar adalah...", opts: ["Mulut – tenggorokan – lambung – usus halus – usus besar – anus", "Mulut – kerongkongan – lambung – usus halus – usus besar – anus", "Mulut – kerongkongan – usus halus – lambung – usus besar – anus", "Mulut – tenggorokan – lambung – usus besar – usus halus – anus"], ans: 1 },
+  { level: "Easy", q: "2. Pencernaan makanan secara mekanis di dalam rongga mulut dibantu oleh...", opts: ["Gigi dan lidah", "Enzim ptialin dan air liur", "Asam klorida dan pepsin", "Gerak peristaltik"], ans: 0 },
+  { level: "Easy", q: "3. Organ pencernaan yang berfungsi menyerap sari-sari makanan ke dalam aliran darah adalah...", opts: ["Lambung", "Usus besar", "Usus halus", "Kerongkongan"], ans: 2 },
+  { level: "Medium", q: "4. Gerakan meremas dan mendorong makanan dari kerongkongan menuju lambung disebut...", opts: ["Gerak refleks", "Gerak peristaltik", "Gerak mekanis", "Gerak kimiawi"], ans: 1 },
+  { level: "Medium", q: "5. Di dalam lambung terdapat asam klorida (HCl) yang memiliki fungsi sangat penting, yaitu...", opts: ["Mengubah zat tepung menjadi zat gula", "Menyerap air dan garam mineral dari sisa makanan", "Membunuh kuman penyakit yang masuk bersama makanan", "Mengemulsikan lemak menjadi butiran halus"], ans: 2 },
+  { level: "Medium", q: "6. Enzim ptialin yang terdapat pada air liur berperan untuk memecah...", opts: ["Protein menjadi pepton", "Lemak menjadi asam lemak", "Amilum (karbohidrat) menjadi glukosa", "Susu menjadi kasein"], ans: 2 },
+  { level: "Medium", q: "7. Bagian utama pada usus besar yang berperan dalam proses pembusukan sisa makanan dibantu oleh bakteri Escherichia coli adalah...", opts: ["Usus dua belas jari", "Usus kosong", "Kolon", "Rektum"], ans: 2 },
+  { level: "HOTS", q: "8. Seorang siswa mengunyah nasi putih selama kurang lebih 3 menit tanpa ditelan. Lama-kelamaan, nasi tersebut terasa sedikit manis di lidah. Peristiwa ini membuktikan bahwa...", opts: ["Nasi putih mengandung banyak gula buatan", "Lidah mampu mengubah rasa makanan secara mekanis", "Enzim dalam air liur mengubah karbohidrat menjadi zat gula sederhana", "Gigi geraham menghancurkan nasi hingga mengeluarkan rasa manis"], ans: 2 },
+  { level: "HOTS", q: "9. Jika bagian pankreas seseorang mengalami kerusakan sehingga tidak dapat memproduksi enzim lipase, dampak langsung yang akan terjadi pada proses pencernaannya adalah...", opts: ["Tubuh kesulitan mencerna makanan berlemak", "Protein dari daging tidak dapat dipecah menjadi asam amino", "Sisa makanan menjadi terlalu keras dan sulit dikeluarkan", "Asam lambung akan naik menuju kerongkongan"], ans: 0 },
+  { level: "HOTS", q: "10. Pak Budi menjalani operasi pemotongan sebagian usus halusnya karena penyumbatan. Dokter menyarankan Pak Budi makan dalam porsi kecil namun sering. Alasan medis yang paling tepat adalah...", opts: ["Lambung Pak Budi tidak lagi mampu menampung makanan dalam jumlah banyak", "Luas permukaan penyerapan sari makanan berkurang sehingga butuh waktu bertahap", "Usus besar tidak dapat membusukkan sisa makanan yang terlalu padat", "Kerongkongan membutuhkan waktu lebih lama untuk mendorong makanan"], ans: 1 },
+  { sec: "B. Makanan Sehat untuk Tubuhku", level: "Easy", q: "11. Zat gizi yang berfungsi sebagai sumber energi utama bagi tubuh untuk beraktivitas adalah...", opts: ["Vitamin", "Mineral", "Karbohidrat", "Protein"], ans: 2 },
+  { level: "Easy", q: "12. Bahan makanan berikut yang merupakan sumber protein nabati adalah...", opts: ["Telur dan daging ayam", "Ikan dan susu sapi", "Tempe dan tahu", "Keju dan udang"], ans: 2 },
+  { level: "Easy", q: "13. Kekurangan vitamin C dalam jangka waktu lama dapat menyebabkan gangguan kesehatan berupa...", opts: ["Rabun senja", "Sariawan dan gusi berdarah", "Tulang rapuh (osteoporosis)", "Penyakit beri-beri"], ans: 1 },
+  { level: "Medium", q: "14. Lemak merupakan salah satu zat gizi makro yang diperlukan tubuh. Selain sebagai cadangan energi, lemak juga berfungsi untuk...", opts: ["Membangun sel-sel otot yang rusak", "Melarutkan vitamin A, D, E, dan K", "Mempercepat pembekuan darah saat luka", "Mengatur keseimbangan cairan tubuh"], ans: 1 },
+  { level: "Medium", q: "15. Dalam pedoman gizi seimbang 'Isi Piringku', porsi makanan yang dianjurkan dalam satu kali makan terdiri atas...", opts: ["Setengah piring makanan pokok, setengah piring lauk-pauk", "Setengah piring buah dan sayur, setengah piring makanan pokok dan lauk-pauk", "Sepertiga piring karbohidrat, dua pertiga piring protein hewani", "Tiga perempat piring sayur-sayuran, seperempat piring buah-buahan"], ans: 1 },
+  { level: "Medium", q: "16. Mineral zat besi (Fe) sangat dibutuhkan oleh anak-anak dalam masa pertumbuhan karena berfungsi untuk...", opts: ["Pembentukan sel darah merah agar terhindar dari anemia", "Menjaga kesehatan gigi dan kekuatan tulang", "Mengatur kerja kelenjar tiroid di leher", "Menjaga kelembapan kulit dan kesehatan mata"], ans: 0 },
+  { level: "Medium", q: "17. Makanan cepat saji (junk food) sebaiknya tidak dikonsumsi setiap hari karena umumnya memiliki kandungan...", opts: ["Serat dan vitamin yang terlalu tinggi", "Lemak jenuh, gula, dan garam yang tinggi namun rendah serat", "Protein nabati dan air yang berlebihan", "Karbohidrat kompleks dan mineral yang sulit dicerna"], ans: 1 },
+  { level: "HOTS", q: "18. Menu makan siang Rina: Nasi putih, kentang goreng, mi instan, dan minuman bersoda manis. Jika dikonsumsi setiap hari, masalah gizi yang paling mungkin dialaminya adalah...", opts: ["Kelebihan protein dan kekurangan karbohidrat sehingga mudah lelah", "Kelebihan karbohidrat dan gula sederhana namun kekurangan protein serta vitamin", "Kekurangan kalori harian sehingga berat badan turun drastis", "Kelebihan serat pangan yang memicu gangguan penyerapan mineral"], ans: 1 },
+  { level: "HOTS", q: "19. Seorang atlet angkat besi membutuhkan asupan nutrisi berbeda dibandingkan pekerja kantoran. Zat gizi yang harus lebih banyak dikonsumsi atlet tersebut untuk memperbaiki jaringan otot adalah...", opts: ["Karbohidrat sederhana dari minuman manis", "Lemak jenuh dari gorengan", "Protein dari putih telur, dada ayam, dan kacang-kacangan", "Vitamin K dari sayuran hijau"], ans: 2 },
+  { level: "HOTS", q: "20. Pada label informasi nilai gizi produk kemasan tertera: Gula: 28 gram, Natrium: 650 mg, Serat Pangan: 0 gram per sajian. Keputusan yang paling bijak adalah...", opts: ["Dapat dikonsumsi sebagai pengganti makan malam karena praktis", "Baik dikonsumsi anak-anak setiap hari untuk menambah energi belajar", "Sebaiknya dibatasi konsumsinya karena tinggi gula dan garam namun tidak berserat", "Sangat aman bagi penderita tekanan darah tinggi karena bebas serat"], ans: 2 },
+  { sec: "C. Pencernaan Sehat, Tubuh Kuat", level: "Easy", q: "21. Gangguan pencernaan yang ditandai dengan frekuensi buang air besar lebih dari tiga kali sehari dengan tinja encer disebut...", opts: ["Sembelit (konstipasi)", "Diare", "Maag (gastritis)", "Apendisitis"], ans: 1 },
+  { level: "Easy", q: "22. Kebiasaan sederhana yang paling efektif mencegah masuknya kuman penyebab diare sebelum makan adalah...", opts: ["Minum air es setelah makan", "Mencuci tangan dengan sabun dan air mengalir", "Tidur telentang segera setelah makan", "Mengonsumsi makanan yang sangat pedas"], ans: 1 },
+  { level: "Easy", q: "23. Penyakit radang pada dinding lambung yang sering disebabkan oleh pola makan tidak teratur adalah...", opts: ["Tifus", "Mag (gastritis)", "Disentri", "Sembelit"], ans: 1 },
+  { level: "Medium", q: "24. Sembelit atau konstipasi terjadi ketika sisa makanan bergerak terlalu lambat di dalam usus besar sehingga...", opts: ["Penyerapan air terjadi secara berlebihan dan feses menjadi keras", "Bakteri pembusuk mati dan tidak bisa mengurai makanan", "Dinding usus besar mengalami luka akibat asam lambung", "Sari-sari makanan kembali masuk ke dalam usus halus"], ans: 0 },
+  { level: "Medium", q: "25. Mengonsumsi makanan yang mengandung probiotik seperti yoghurt dan tempe sangat baik untuk pencernaan karena...", opts: ["Membunuh seluruh bakteri yang ada di dalam usus", "Menambah jumlah bakteri baik yang menjaga keseimbangan mikroflora usus", "Menghentikan gerakan peristaltik pada kerongkongan", "Menetralkan seluruh enzim pencernaan di lambung"], ans: 1 },
+  { level: "Medium", q: "26. Kebiasaan langsung berbaring atau tidur setelah makan malam dapat memicu gangguan pencernaan berupa...", opts: ["Naiknya asam lambung ke kerongkongan (GERD)", "Penyumbatan pada usus buntu", "Berkurangnya produksi air liur secara permanen", "Terhentinya penyerapan air di usus besar"], ans: 0 },
+  { level: "Medium", q: "27. Langkah pertolongan pertama yang paling tepat diberikan kepada seseorang yang mengalami diare agar tidak kekurangan cairan (dehidrasi) adalah...", opts: ["Memberikan obat penahan nyeri dosis tinggi", "Memberikan larutan oralit atau banyak minum air putih", "Meminta penderita berpuasa makan dan minum selama 24 jam", "Memberikan makanan berserat tinggi dalam jumlah banyak"], ans: 1 },
+  { level: "HOTS", q: "28. Andi sering mengeluh sulit buang air besar selama 4 hari berturut-turut karena jarang minum air putih dan tidak pernah makan sayur maupun buah. Hubungan pola makan Andi dengan keluhannya adalah...", opts: ["Kurangnya serat dan cairan membuat volume feses kecil dan keras sehingga sulit didorong usus besar", "Kurangnya protein menyebabkan otot dinding lambung melemah saat mencerna makanan", "Terlalu banyak karbohidrat membuat bakteri baik di usus halus berkembang biak berlebihan", "Kurangnya vitamin D menghambat proses penyerapan sari makanan di usus dua belas jari"], ans: 0 },
+  { level: "HOTS", q: "29. Perhatikan kebiasaan berikut: (1) Makan terburu-buru tanpa mengunyah hingga halus. (2) Membiasakan sarapan pagi. (3) Jajan sembarangan di pinggir jalan tidak tertutup. (4) Minum air putih 8 gelas sehari. Kebiasaan yang memperberat kerja lambung dan memicu infeksi ditunjukkan nomor...", opts: ["1 dan 2", "1 dan 3", "2 dan 4", "3 dan 4"], ans: 1 },
+  { level: "HOTS", q: "30. Sekolah mengadakan kampanye 'Bekal Sehatku' untuk menekan angka siswa yang sakit perut dan diare akibat jajan sembarangan. Evaluasi keberhasilan program ini dalam jangka panjang dapat dilihat dari...", opts: ["Meningkatnya jumlah pedagang makanan di luar pagar sekolah", "Berkurangnya jumlah siswa yang izin tidak masuk sekolah karena gangguan pencernaan", "Meningkatnya penjualan minuman kemasan manis di kantin sekolah", "Banyaknya siswa yang membawa uang saku lebih besar dari rumah"], ans: 1 }
+];
+
+let totalSeconds = 45 * 60;
+let timerInterval;
+
+function startQuiz() {
+  const name = document.getElementById('studentName').value.trim();
+  if (!name) {
+    alert("Silakan ketik nama lengkapmu terlebih dahulu!");
+    return;
+  }
+  document.getElementById('display-name').innerText = name;
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('timer-bar').style.display = 'flex';
+  document.getElementById('quiz-area').style.display = 'block';
+  renderQuestions();
+  startTimer();
+}
+
+function renderQuestions() {
+  const container = document.getElementById('questions-container');
+  let html = "";
+  quizData.forEach((item, index) => {
+    if (item.sec) {
+      html += `<div class="section-title">${item.sec}</div>`;
+    }
+    const badgeClass = item.level.toLowerCase();
+    html += `<div class="question-card">
+      <span class="badge ${badgeClass}">${item.level}</span>
+      <p><strong>${item.q}</strong></p>
+      <div class="options">`;
+    item.opts.forEach((opt, i) => {
+      html += `<label><input type="radio" name="q${index}" value="${i}"> ${opt}</label>`;
+    });
+    html += `</div></div>`;
+  });
+  container.innerHTML = html;
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    totalSeconds--;
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    document.getElementById('time-left').innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    
+    if (totalSeconds <= 300) {
+      document.getElementById('timer-bar').classList.add('timer-warning');
+    }
+    if (totalSeconds <= 0) {
+      clearInterval(timerInterval);
+      alert("Waktu pengerjaan habis! Jawabanmu otomatis dikirim.");
+      submitQuiz(true);
+    }
+  }, 1000);
+}
+
+function submitQuiz(isAuto) {
+  if (!isAuto) {
+    const confirmSubmit = confirm("Apakah kamu yakin ingin mengirim semua jawaban sekarang?");
+    if (!confirmSubmit) return;
+  }
+  clearInterval(timerInterval);
+
+  const name = document.getElementById('studentName').value.trim();
+  let correct = 0;
+  let reviewHtml = "";
+
+  quizData.forEach((item, index) => {
+    const selected = document.querySelector(`input[name="q${index}"]:checked`);
+    const userAns = selected ? parseInt(selected.value) : -1;
+    const isCorrect = userAns === item.ans;
+    if (isCorrect) correct++;
+
+    const statusText = isCorrect ? "✅ Benar" : (userAns === -1 ? "⚠️ Tidak Dijawab" : "❌ Kurang Tepat");
+    const borderClass = isCorrect ? "correct-border" : "wrong-border";
+
+    reviewHtml += `<div class="review-item ${borderClass}">
+      <strong>${item.q}</strong><br>
+      Status: ${statusText}<br>
+      ${!isCorrect ? `Jawabanmu: ${userAns === -1 ? "-" : item.opts[userAns]}<br><strong>Kunci Jawaban: ${item.opts[item.ans]}</strong>` : `Jawabanmu: <strong>${item.opts[userAns]}</strong>`}
+    </div>`;
+  });
+
+  const score = Math.round((correct / quizData.length) * 100);
+  document.getElementById('timer-bar').style.display = 'none';
+  document.getElementById('quiz-area').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('resName').innerText = name;
+  document.getElementById('resScore').innerText = score;
+  document.getElementById('resDetail').innerText = `Kamu menjawab benar ${correct} dari ${quizData.length} soal.`;
+  document.getElementById('review-container').innerHTML = reviewHtml;
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
